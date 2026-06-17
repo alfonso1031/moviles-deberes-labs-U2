@@ -31,14 +31,21 @@ lib/
 
 ## Configuracion de Google Maps (IMPORTANTE)
 El mapa no se mostrara hasta colocar una clave de API valida.
+La clave NO va en el codigo: se carga desde un archivo gitignored e inyectada
+por Gradle al AndroidManifest (`${MAPS_API_KEY}`).
 
 1. Crea una clave en Google Cloud Console (habilita "Maps SDK for Android").
-2. En `android/app/src/main/AndroidManifest.xml` reemplaza `TU_API_KEY`:
-   ```xml
-   <meta-data
-       android:name="com.google.android.geo.API_KEY"
-       android:value="TU_API_KEY" />
+2. Copia el ejemplo y pon tu clave real:
+   ```bash
+   cp android/secrets.properties.example android/secrets.properties
    ```
+   ```properties
+   # android/secrets.properties
+   MAPS_API_KEY=AIza...tu_clave
+   ```
+3. `flutter run`. Gradle lee `secrets.properties` y rellena la clave.
+
+`android/secrets.properties` esta en `.gitignore`, asi la clave nunca se sube.
 
 ## Ejecutar
 ```bash
