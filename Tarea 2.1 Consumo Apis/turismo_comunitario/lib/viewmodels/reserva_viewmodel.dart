@@ -35,6 +35,16 @@ class ReservaViewModel extends ChangeNotifier {
     }
   }
 
+  Future<String?> actualizar(int id, Reserva r) async {
+    try {
+      await service.actualizar(id, r);
+      await cargarPorDestino(r.destinoId);
+      return null;
+    } catch (e) {
+      return e.toString().replaceFirst("Exception: ", "");
+    }
+  }
+
   Future<bool> eliminar(int id, int destinoId) async {
     try {
       await service.eliminar(id);

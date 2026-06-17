@@ -38,10 +38,17 @@ class _DetallePageState extends State<DetallePage> {
     super.dispose();
   }
 
-  Future<void> _formularioReserva() async {
-    _nombreCtrl.clear();
-    _personasCtrl.clear();
-    _fecha = null;
+  Future<void> _formularioReserva({Reserva? existente}) async {
+    if (existente != null) {
+      _nombreCtrl.text = existente.nombreTurista;
+      _personasCtrl.text = existente.numPersonas.toString();
+      _fecha = DateTime.tryParse(existente.fecha);
+    } else {
+      _nombreCtrl.clear();
+      _personasCtrl.clear();
+      _fecha = null;
+    }
+    final editando = existente != null;
 
     await showModalBottomSheet(
       context: context,
@@ -63,8 +70,8 @@ class _DetallePageState extends State<DetallePage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Registrar reserva",
-                      style: TextStyle(
+                  Text(editando ? "Editar reserva" : "Registrar reserva",
+                      style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
                   TextField(
@@ -110,8 +117,8 @@ class _DetallePageState extends State<DetallePage> {
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
-                      onPressed: () => _enviarReserva(ctx),
-                      child: const Text("Reservar"),
+                      onPressed: () => _enviarReserva(ctx, existente),
+                      child: Text(editando ? "Guardar cambios" : "Reservar"),
                     ),
                   ),
                 ],
@@ -123,7 +130,7 @@ class _DetallePageState extends State<DetallePage> {
     );
   }
 
-  Future<void> _enviarReserva(BuildContext sheetCtx) async {
+  Future<void> _enviarReserva(BuildContext sheetCtx, Reserva? existente) async {
     final messenger = ScaffoldMessenger.of(context);
     final sheetNav = Navigator.of(sheetCtx);
     final nombre = _nombreCtrl.text.trim();
@@ -138,18 +145,21 @@ class _DetallePageState extends State<DetallePage> {
 
     final vm = context.read<ReservaViewModel>();
     final reserva = Reserva(
-      id: 0,
+      id: existente?.id ?? 0,
       destinoId: _destino.id,
       nombreTurista: nombre,
       fecha: _fecha!.toIso8601String().substring(0, 10),
       numPersonas: personas,
     );
 
-    final error = await vm.crear(reserva);
+    final error = existente == null
+        ? await vm.crear(reserva)
+        : await vm.actualizar(existente.id, reserva);
     if (!mounted) return;
     sheetNav.pop();
     messenger.showSnackBar(SnackBar(
-      content: Text(error ?? "Reserva registrada"),
+      content: Text(error ??
+          (existente == null ? "Reserva registrada" : "Reserva actualizada")),
     ));
   }
 
@@ -266,6 +276,7 @@ class _DetallePageState extends State<DetallePage> {
           else
             ...rvm.reservas.map((r) => ReservaCard(
                   reserva: r,
+                  onEditar: () => _formularioReserva(existente: r),
                   onEliminar: () => rvm.eliminar(r.id, _destino.id),
                 )),
         ],

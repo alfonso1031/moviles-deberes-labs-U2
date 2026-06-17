@@ -26,6 +26,19 @@ class ReservaService {
     return Reserva.fromJson(jsonDecode(resp.body));
   }
 
+  Future<Reserva> actualizar(int id, Reserva r) async {
+    final resp = await http.put(
+      Uri.parse("$baseUrl/reservas/$id"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(r.toJson()),
+    );
+    if (resp.statusCode == 400) {
+      throw Exception(jsonDecode(resp.body)["detail"] ?? "Error");
+    }
+    if (resp.statusCode != 200) throw Exception("Error al actualizar reserva");
+    return Reserva.fromJson(jsonDecode(resp.body));
+  }
+
   Future<void> eliminar(int id) async {
     final resp = await http.delete(Uri.parse("$baseUrl/reservas/$id"));
     if (resp.statusCode != 200) throw Exception("Error al eliminar reserva");

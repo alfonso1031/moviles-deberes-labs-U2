@@ -3,11 +3,13 @@ import '../models/reserva.dart';
 
 class ReservaCard extends StatelessWidget {
   final Reserva reserva;
+  final VoidCallback onEditar;
   final VoidCallback onEliminar;
 
   const ReservaCard({
     super.key,
     required this.reserva,
+    required this.onEditar,
     required this.onEliminar,
   });
 
@@ -41,6 +43,10 @@ class ReservaCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            IconButton(
+              icon: Icon(Icons.edit_outlined, color: scheme.primary),
+              onPressed: onEditar,
             ),
             IconButton(
               icon: Icon(Icons.delete_outline, color: scheme.error),
