@@ -36,7 +36,9 @@ Servidor: `http://localhost:8000`  ·  Docs: `http://localhost:8000/docs`
 | DELETE | /destinos/{id}            | Eliminar (falla si tiene reservas)   |
 | GET    | /destinos/{id}/reservas   | Reservas de un destino               |
 | GET    | /reservas                 | Listar todas las reservas            |
+| GET    | /reservas/{id}            | Obtener una reserva                  |
 | POST   | /reservas                 | Crear reserva (valida fecha)         |
+| PUT    | /reservas/{id}            | Actualizar reserva (valida fecha)    |
 | DELETE | /reservas/{id}            | Eliminar reserva                     |
 
 ## Conexion desde Flutter

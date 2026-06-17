@@ -1,17 +1,24 @@
-# adopcion_mascotas
+# turismo_comunitario
 
-A new Flutter project.
+App Flutter (MVVM + Provider) que consume la API REST de Turismo Comunitario.
 
-## Getting Started
+La guia completa de instalacion y ejecucion esta en el README de la carpeta
+superior: `../README.md`.
 
-This project is a starting point for a Flutter application.
+## Resumen rapido
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+flutter run
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+El backend FastAPI debe estar corriendo. Configura la URL de la API en
+`lib/services/destino_service.dart` y `lib/services/reserva_service.dart`.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Estructura (MVVM)
+
+- `lib/models/` — entidades (Destino, Reserva)
+- `lib/services/` — consumo HTTP de la API
+- `lib/viewmodels/` — estado y logica (ChangeNotifier)
+- `lib/views/` — pantallas (splash, lista, detalle, formularios)
+- `lib/widgets/` — componentes reutilizables

@@ -117,8 +117,15 @@ def reservas_de_destino(id: int, session: Session = Depends(get_session)):
     ).all()
 
 
-@app.post("/reservas", response_model=ReservaRead, status_code=201)
-def crear_reserva(data: ReservaCreate, session: Session = Depends(get_session)):
+@app.get("/reservas/{id}", response_model=ReservaRead)
+def obtener_reserva(id: int, session: Session = Depends(get_session)):
+    reserva = session.get(Reserva, id)
+    if not reserva:
+        raise HTTPException(status_code=404, detail="Reserva no encontrada")
+    return reserva
+
+
+def _validar_reserva(data: ReservaCreate, session: Session):
     destino = session.get(Destino, data.destino_id)
     if not destino:
         raise HTTPException(status_code=404, detail="Destino no encontrado")
@@ -136,7 +143,27 @@ def crear_reserva(data: ReservaCreate, session: Session = Depends(get_session)):
             status_code=400,
             detail="El numero de personas debe ser al menos 1"
         )
+
+
+@app.post("/reservas", response_model=ReservaRead, status_code=201)
+def crear_reserva(data: ReservaCreate, session: Session = Depends(get_session)):
+    _validar_reserva(data, session)
     reserva = Reserva(**data.model_dump())
+    session.add(reserva)
+    session.commit()
+    session.refresh(reserva)
+    return reserva
+
+
+@app.put("/reservas/{id}", response_model=ReservaRead)
+def actualizar_reserva(id: int, data: ReservaCreate,
+                       session: Session = Depends(get_session)):
+    reserva = session.get(Reserva, id)
+    if not reserva:
+        raise HTTPException(status_code=404, detail="Reserva no encontrada")
+    _validar_reserva(data, session)
+    for k, v in data.model_dump().items():
+        setattr(reserva, k, v)
     session.add(reserva)
     session.commit()
     session.refresh(reserva)
