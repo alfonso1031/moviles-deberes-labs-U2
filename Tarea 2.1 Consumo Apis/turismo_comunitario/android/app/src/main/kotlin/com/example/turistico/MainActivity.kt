@@ -1,4 +1,4 @@
-package com.example.adopcion_mascotas
+package com.example.turistico
 
 import io.flutter.embedding.android.FlutterActivity
 

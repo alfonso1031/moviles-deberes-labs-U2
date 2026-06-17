@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/destino.dart';
 
 class DestinoService {
-  final String baseUrl = "http://10.40.52.115:8000";
+  final String baseUrl = "http://192.168.100.31:8000";
 
   Future<List<Destino>> listar() async {
     final resp = await http.get(Uri.parse("$baseUrl/destinos"));

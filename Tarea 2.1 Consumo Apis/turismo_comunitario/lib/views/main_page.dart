@@ -13,7 +13,7 @@ class _MainPageState extends State<MainPage> {
   int _indice = 0;
 
   final _titulos = const ["Destinos", "Registrar destino"];
-  final _paginas = const [DestinosPage(), DestinoFormPage()];
+  final _paginas = const [DestinosPage(), DestinoFormPage(embedded: true)];
 
   @override
   Widget build(BuildContext context) {

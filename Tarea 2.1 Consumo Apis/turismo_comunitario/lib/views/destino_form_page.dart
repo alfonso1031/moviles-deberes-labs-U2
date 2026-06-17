@@ -5,8 +5,9 @@ import '../viewmodels/destino_viewmodel.dart';
 
 class DestinoFormPage extends StatefulWidget {
   final Destino? destino;
+  final bool embedded;
 
-  const DestinoFormPage({super.key, this.destino});
+  const DestinoFormPage({super.key, this.destino, this.embedded = false});
 
   @override
   State<DestinoFormPage> createState() => _DestinoFormPageState();
@@ -63,12 +64,21 @@ class _DestinoFormPageState extends State<DestinoFormPage> {
 
     if (!mounted) return;
     setState(() => _guardando = false);
-    if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(widget.destino == null
-            ? "Destino registrado"
-            : "Destino actualizado"),
-      ));
+    if (!ok) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(widget.destino == null
+          ? "Destino registrado"
+          : "Destino actualizado"),
+    ));
+
+    if (widget.embedded) {
+      _formKey.currentState!.reset();
+      _nombreCtrl.clear();
+      _comunidadCtrl.clear();
+      _descCtrl.clear();
+      _precioCtrl.clear();
+    } else {
       Navigator.pop(context);
     }
   }
@@ -76,15 +86,11 @@ class _DestinoFormPageState extends State<DestinoFormPage> {
   @override
   Widget build(BuildContext context) {
     final esEdicion = widget.destino != null;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(esEdicion ? "Editar destino" : "Registrar destino"),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
+    final form = Form(
+      key: _formKey,
+      child: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
             TextFormField(
               controller: _nombreCtrl,
               decoration: const InputDecoration(
@@ -151,7 +157,15 @@ class _DestinoFormPageState extends State<DestinoFormPage> {
             ),
           ],
         ),
+      );
+
+    if (widget.embedded) return form;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(esEdicion ? "Editar destino" : "Registrar destino"),
       ),
+      body: form,
     );
   }
 }
