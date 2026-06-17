@@ -1,0 +1,10 @@
+# Python / FastAPI
+backend_fastapi/venv/
+backend_fastapi/__pycache__/
+*.db
+
+# Flutter
+turismo_comunitario/build/
+turismo_comunitario/.dart_tool/
+turismo_comunitario/.flutter-plugins
+turismo_comunitario/.flutter-plugins-dependencies
