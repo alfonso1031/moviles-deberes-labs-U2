@@ -47,13 +47,50 @@ por Gradle al AndroidManifest (`${MAPS_API_KEY}`).
 
 `android/secrets.properties` esta en `.gitignore`, asi la clave nunca se sube.
 
-## Ejecutar
+## Requisitos previos
+- Flutter SDK 3.x y Dart 3.x (`flutter --version`).
+- Android Studio o VS Code con el plugin de Flutter.
+- Un dispositivo Android **fisico** con depuracion USB activada (la camara y el
+  GPS no funcionan bien en emulador).
+- Una clave de API de Google Maps (ver seccion anterior).
+
+## Instalacion y ejecucion (paso a paso)
+1. Clonar o descargar el repositorio y entrar a la carpeta del proyecto:
+   ```bash
+   cd "Laboratorio 2.1 Consumo de Recursos Hardware"
+   ```
+2. Instalar las dependencias:
+   ```bash
+   flutter pub get
+   ```
+3. Configurar la clave de Google Maps:
+   ```bash
+   cp android/secrets.properties.example android/secrets.properties
+   # editar android/secrets.properties y poner: MAPS_API_KEY=AIza...tu_clave
+   ```
+4. Conectar el celular por USB y verificar que Flutter lo detecta:
+   ```bash
+   flutter devices
+   ```
+5. Ejecutar la app en el dispositivo:
+   ```bash
+   flutter run
+   ```
+6. Al primer uso, **aceptar los permisos** de camara y ubicacion que pide el sistema,
+   y mantener el **GPS encendido**.
+
+### Comandos utiles
 ```bash
-flutter pub get
-flutter run
+flutter analyze      # analisis estatico (sin errores)
+flutter clean        # limpiar build si el mapa no carga tras cambiar la clave
+flutter build apk    # generar APK de instalacion
 ```
-Usar un dispositivo fisico (camara y GPS no funcionan bien en emulador sin
-configuracion extra).
+
+### Solucion de problemas
+- **Mapa en gris**: clave invalida, sin "Maps SDK for Android" habilitado, o sin
+  facturacion. Tras corregir, ejecutar `flutter clean` y volver a `flutter run`.
+- **No obtiene ubicacion**: activar el GPS y conceder el permiso de ubicacion.
+- **La camara no abre**: conceder el permiso de camara en los ajustes de la app.
 
 ## Aprendizajes
 Uso de camara, manejo de permisos en tiempo de ejecucion y geolocalizacion.
