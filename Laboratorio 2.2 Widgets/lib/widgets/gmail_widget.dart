@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/correo_viewmodel.dart';
 import '../models/correo.dart';
+import '../views/correo_detalle_page.dart';
 
 /// Componente visual tipo Gmail con correos simulados.
 class GmailWidget extends StatelessWidget {
@@ -131,9 +132,18 @@ class GmailWidget extends StatelessWidget {
                               ? null
                               : const Icon(Icons.circle,
                                   color: Colors.red, size: 10),
-                          onTap: () => context
-                              .read<CorreoViewModel>()
-                              .marcarLeido(c.id),
+                          onTap: () {
+                            context
+                                .read<CorreoViewModel>()
+                                .marcarLeido(c.id);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    CorreoDetallePage(correo: c),
+                              ),
+                            );
+                          },
                         );
                       },
                     ),

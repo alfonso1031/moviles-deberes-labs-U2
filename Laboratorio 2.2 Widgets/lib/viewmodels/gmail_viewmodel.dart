@@ -88,6 +88,10 @@ class GmailViewModel extends ChangeNotifier {
     }
   }
 
+  /// Devuelve el cuerpo completo de un correo real.
+  Future<String> obtenerCuerpo(String messageId) =>
+      _service.obtenerCuerpo(messageId);
+
   Future<void> _recargar() async {
     _correos = await _service.leerCorreos();
     _error = null;

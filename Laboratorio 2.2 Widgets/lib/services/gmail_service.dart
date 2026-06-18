@@ -75,6 +75,65 @@ class GmailService {
     return result;
   }
 
+  /// Obtiene el cuerpo completo de un mensaje real.
+  /// Extrae texto plano; si no existe, limpia el HTML.
+  Future<String> obtenerCuerpo(String messageId) async {
+    final api = _api;
+    if (api == null) return '';
+
+    final msg = await api.users.messages.get('me', messageId, format: 'full');
+    return _extraerTexto(msg.payload) ?? msg.snippet ?? '';
+  }
+
+  /// Recorre el arbol MIME buscando text/plain; fallback a text/html sin tags.
+  String? _extraerTexto(MessagePart? part) {
+    if (part == null) return null;
+
+    final mime = part.mimeType ?? '';
+
+    // Parte simple con datos
+    if (part.body?.data != null) {
+      final decoded = utf8.decode(
+        base64Url.decode(part.body!.data!.replaceAll('-', '+').replaceAll('_', '/')),
+        allowMalformed: true,
+      );
+      if (mime == 'text/plain') return decoded;
+      if (mime == 'text/html') return _stripHtml(decoded);
+    }
+
+    // Multipart: buscar primero text/plain en los hijos
+    final partes = part.parts ?? [];
+    for (final p in partes) {
+      if ((p.mimeType ?? '').contains('plain')) {
+        final r = _extraerTexto(p);
+        if (r != null) return r;
+      }
+    }
+    // Fallback: cualquier parte legible
+    for (final p in partes) {
+      final r = _extraerTexto(p);
+      if (r != null) return r;
+    }
+    return null;
+  }
+
+  /// Quita etiquetas HTML dejando solo el texto.
+  String _stripHtml(String html) {
+    return html
+        .replaceAll(RegExp(r'<style[^>]*>.*?</style>', dotAll: true), '')
+        .replaceAll(RegExp(r'<script[^>]*>.*?</script>', dotAll: true), '')
+        .replaceAll(RegExp(r'<br\s*/?>'), '\n')
+        .replaceAll(RegExp(r'<p[^>]*>'), '\n')
+        .replaceAll(RegExp(r'</p>'), '\n')
+        .replaceAll(RegExp(r'<[^>]+>'), '')
+        .replaceAll(RegExp(r'&nbsp;'), ' ')
+        .replaceAll(RegExp(r'&amp;'), '&')
+        .replaceAll(RegExp(r'&lt;'), '<')
+        .replaceAll(RegExp(r'&gt;'), '>')
+        .replaceAll(RegExp(r'\n{3,}'), '\n\n')
+        .trim();
+  }
+
   /// Envia un correo real desde la cuenta del usuario.
   Future<void> enviarCorreo({
     required String destinatario,

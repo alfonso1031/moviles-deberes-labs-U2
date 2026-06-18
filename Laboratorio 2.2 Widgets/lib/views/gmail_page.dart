@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/gmail_viewmodel.dart';
+import 'correo_detalle_page.dart';
 
 /// Pantalla principal: correos reales de Gmail.
 /// Pide la autenticacion con Google al iniciar.
@@ -178,6 +179,17 @@ class _GmailView extends StatelessWidget {
                         c.asunto,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                      ),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CorreoDetallePage(
+                            correo: c,
+                            bodyFuture: context
+                                .read<GmailViewModel>()
+                                .obtenerCuerpo(c.id),
+                          ),
+                        ),
                       ),
                     );
                   },
