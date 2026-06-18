@@ -2,21 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/gmail_viewmodel.dart';
 
-/// View de la Fase 2: muestra correos REALES de Gmail.
-class GmailRealPage extends StatelessWidget {
-  const GmailRealPage({super.key});
+/// Pantalla principal: correos reales de Gmail.
+/// Pide la autenticacion con Google al iniciar.
+class GmailPage extends StatelessWidget {
+  const GmailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => GmailViewModel(),
-      child: const _GmailRealView(),
+      // Lanza el inicio de sesion automaticamente al crear el ViewModel.
+      create: (_) => GmailViewModel()..conectar(),
+      child: const _GmailView(),
     );
   }
 }
 
-class _GmailRealView extends StatelessWidget {
-  const _GmailRealView();
+class _GmailView extends StatelessWidget {
+  const _GmailView();
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,7 @@ class _GmailRealView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.red,
         foregroundColor: Colors.white,
-        title: const Text('Gmail real (Fase 2)'),
+        title: const Text('Gmail'),
         actions: [
           if (vm.conectado) ...[
             IconButton(
@@ -66,10 +68,17 @@ class _GmailRealView extends StatelessWidget {
           children: [
             const Icon(Icons.mail, color: Colors.red, size: 64),
             const SizedBox(height: 16),
-            const Text('Conecta tu cuenta de Gmail real'),
+            const Text('Inicia sesion para ver tu correo'),
             if (vm.error != null) ...[
               const SizedBox(height: 8),
-              Text(vm.error!, style: const TextStyle(color: Colors.red)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  vm.error!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
             ],
             const SizedBox(height: 16),
             ElevatedButton.icon(
@@ -185,7 +194,7 @@ class _GmailRealView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Redactar correo real'),
+        title: const Text('Redactar correo'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -218,7 +227,7 @@ class _GmailRealView extends StatelessWidget {
                 cuerpo: cuerpo.text.trim(),
               );
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Enviando correo real...')),
+                const SnackBar(content: Text('Enviando correo...')),
               );
             },
             child: const Text('Enviar'),

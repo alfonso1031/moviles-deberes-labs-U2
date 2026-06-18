@@ -1,83 +1,103 @@
-# Laboratorio 2.2 — Widget tipo Gmail (MVVM + Provider)
+# Conexion a Gmail (Flutter + MVVM)
 
-App Flutter que muestra un widget visual tipo Gmail. Simula acciones basicas
-de correo. Arquitectura **MVVM** con **Provider**.
+App Flutter que se conecta a **Gmail real** con OAuth 2.0 + Gmail API.
+Al abrir pide iniciar sesion con Google y muestra tus correos: leer, buscar,
+contar no leidos y redactar/enviar.
 
-## Fase 1 — Prototipo funcional simulado
+Arquitectura **MVVM** con **Provider**.
 
-### Requisitos cumplidos
-- Widget visual similar a Gmail.
-- Opcion de busqueda (filtra por asunto o remitente).
-- Boton de redactar (formulario simulado).
-- Contador de correos no leidos.
-- Correos guardados en memoria.
-- Buscar correos por asunto o remitente.
-- Contar correos no leidos.
-- Simular redaccion de un nuevo correo.
-- Recepcion de correo simulada (FAB +).
-- Interfaz actualizada con Provider (`ChangeNotifier` + `notifyListeners`).
+---
 
-### Arquitectura (separacion MVVM)
-```
-lib/
-├── models/
-│   └── correo.dart              # MODEL: datos del correo
-├── viewmodels/
-│   └── correo_viewmodel.dart    # VIEWMODEL: logica + estado (ChangeNotifier)
-├── views/
-│   └── home_page.dart           # VIEW: pantalla principal
-├── widgets/
-│   └── gmail_widget.dart        # WIDGET: componente visual tipo Gmail
-└── main.dart                    # MultiProvider + MaterialApp
-```
+## Requisitos previos
+- **Flutter SDK** 3.11+ — https://docs.flutter.dev/get-started/install
+- **Android Studio** / Android SDK + emulador con Google Play o celular real.
+- Verificar: `flutter doctor`
 
-| Capa      | Responsabilidad                                  |
-|-----------|--------------------------------------------------|
-| Model     | Representa un correo (remitente, asunto, leido). |
-| ViewModel | Logica: buscar, contar, marcar leido, redactar.  |
-| View      | Pantalla, dialogos de busqueda/redaccion.        |
-| Widget    | UI reutilizable que observa el ViewModel.        |
-
-### Ejecutar
+## Instalacion y ejecucion
 ```bash
+git clone https://github.com/alfonso1031/moviles-deberes-labs-U2.git
+cd "moviles-deberes-labs-U2/Conexion a Gmail"   # o el nombre de la carpeta
 flutter pub get
 flutter run
 ```
+Al iniciar, la app abre el dialogo de Google → elige tu cuenta → acepta
+permisos → ves tus correos.
 
-### APK generada
-```
-build/app/outputs/flutter-apk/app-release.apk
-```
-Generar de nuevo: `flutter build apk --release`
-
-## Fase 2 — Conexion real con Gmail (implementada)
-
-Pantalla **Gmail real** (icono nube en la AppBar): login con Google, lee y
-envia correos reales mediante OAuth 2.0 + Gmail API.
-
-Codigo:
-```
-lib/services/gmail_service.dart       # OAuth + Gmail API (leer/enviar)
-lib/viewmodels/gmail_viewmodel.dart   # estado de la Fase 2
-lib/views/gmail_real_page.dart        # pantalla de correos reales
+APK compilada lista en la raiz de la carpeta: `app-release.apk`
+```bash
+flutter install            # o: adb install app-release.apk
+flutter build apk --release   # generar de nuevo
 ```
 
-### Configuracion en Google Cloud (obligatoria para que funcione)
-La parte simulada (Fase 1) corre sin nada extra. Para la Fase 2 real:
+---
 
-1. **Proyecto**: https://console.cloud.google.com → crear proyecto.
-2. **Habilitar API**: APIs y servicios → Biblioteca → **Gmail API** → Habilitar.
-3. **Pantalla de consentimiento OAuth**: tipo **Externo**; agregar scopes
-   `gmail.readonly` y `gmail.send`; en **Usuarios de prueba** agregar tu correo
-   Gmail (sin esto el login falla con `access_denied`).
-4. **Credenciales** → Crear → **ID de cliente OAuth** → tipo **Android**:
-   - Nombre del paquete: `com.example.laboratorio_widgets`
-   - Huella **SHA-1** (debug): obtenerla con
+## Funcionalidad
+| Accion | Que hace |
+|--------|----------|
+| Inicio automatico | Pide login con Google al abrir. |
+| Lista de correos | Muestra los mas recientes de tu Gmail real. |
+| Buscar | Filtra por asunto o remitente. |
+| Badge "N no leidos" | Cuenta los correos con etiqueta UNREAD. |
+| Redactar (FAB) | Envia un correo real desde tu cuenta. |
+| Refrescar / Salir | Recarga la bandeja / cierra sesion. |
+
+## Arquitectura (MVVM)
+```
+lib/
+├── models/correo.dart                 # MODEL
+├── services/gmail_service.dart        # OAuth + Gmail API (leer/enviar)
+├── viewmodels/gmail_viewmodel.dart    # VIEWMODEL (estado + logica)
+├── views/gmail_page.dart              # VIEW (pantalla)
+└── main.dart
+```
+
+---
+
+## Configuracion en Google Cloud (OBLIGATORIA)
+
+> **Importante:** en Android **no se usa ninguna API key ni client_id dentro
+> del codigo**. `google_sign_in` identifica la app por **nombre de paquete +
+> huella SHA-1** registrados en el cliente OAuth de Google Cloud. Por eso no
+> hay credenciales en los archivos `.dart`.
+
+Pasos (una sola vez):
+
+1. **Proyecto** — https://console.cloud.google.com → crear proyecto.
+2. **Habilitar Gmail API** — APIs y servicios → Biblioteca → *Gmail API* →
+   Habilitar.
+3. **Pantalla de consentimiento OAuth** (Google Auth Platform):
+   - Tipo: **Externo**.
+   - Permisos (scopes): `gmail.readonly` y `gmail.send`.
+   - **Publico → Usuarios de prueba**: agrega tu correo Gmail. Sin esto el
+     login da `access_denied` (la app esta en modo *Testing*).
+4. **Clientes → Crear credenciales → ID de cliente OAuth**, tipo **Android**:
+   - **Nombre del paquete**: `com.example.laboratorio_widgets`
+   - **Huella SHA-1** del keystore con el que compilas. Para *debug*:
      ```bash
-     keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore \
+     keytool -list -v \
+       -keystore %USERPROFILE%\.android\debug.keystore \
        -alias androiddebugkey -storepass android -keypass android
      ```
-   - Para la APK de *release* repetir con tu keystore de firma.
+     (copia la linea `SHA1:`). Para una APK de *release*, repite con tu
+     keystore de firma y registra tambien ese SHA-1.
 
-En Android no se necesita `google-services.json` ni client_id en el codigo:
-`google_sign_in` usa el cliente OAuth registrado por **paquete + SHA-1**.
+### ¿Hace falta configurar el archivo `.properties`?
+**No para que la app funcione.** El archivo `android/oauth.properties` es solo
+una **referencia/documentacion** de los valores OAuth del proyecto; ni el
+codigo ni Gradle lo leen. La autenticacion depende del paso 4 (paquete +
+SHA-1 en Google Cloud), no de este archivo.
+
+Esta **ignorado por git** (no se sube). Si lo quieres tener localmente,
+crea `android/oauth.properties` con este formato:
+```properties
+# Referencia OAuth (no se consume en el codigo; Android usa paquete + SHA-1)
+oauth.androidClientId=TU_CLIENT_ID.apps.googleusercontent.com
+oauth.packageName=com.example.laboratorio_widgets
+oauth.sha1=TU:HUELLA:SHA1
+```
+
+### Si otra persona clona el repo
+Su keystore de debug tiene un **SHA-1 distinto**. Para que el login le
+funcione debe **registrar su propio SHA-1** (mismo paquete) en el cliente
+OAuth Android del proyecto de Google Cloud, y estar agregado como usuario de
+prueba.
