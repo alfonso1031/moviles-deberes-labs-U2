@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
-import 'package:laboratorio_widgets/views/gmail_page.dart';
+import 'package:laboratorio_widgets/viewmodels/correo_viewmodel.dart';
+import 'package:laboratorio_widgets/views/home_page.dart';
 
 void main() {
-  testWidgets('La app muestra la pantalla de Gmail',
+  testWidgets('Widget Gmail muestra correos simulados',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: GmailPage()),
+      ChangeNotifierProvider(
+        create: (_) => CorreoViewModel(),
+        child: const MaterialApp(home: HomePage()),
+      ),
     );
-    await tester.pump();
-
-    // El titulo de la AppBar siempre esta visible.
     expect(find.text('Gmail'), findsOneWidget);
+    expect(find.textContaining('no leidos'), findsOneWidget);
+    expect(find.text('Redactar'), findsOneWidget);
   });
 }
