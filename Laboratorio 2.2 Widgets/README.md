@@ -1,78 +1,83 @@
 # Laboratorio 2.2 — Widget tipo Gmail (MVVM + Provider)
 
-App Flutter con un widget visual tipo Gmail. Simula acciones basicas de correo.
-Arquitectura **MVVM** + **Provider**.
+App Flutter que muestra un widget visual tipo Gmail. Simula acciones basicas
+de correo. Arquitectura **MVVM** con **Provider**.
 
----
+## Fase 1 — Prototipo funcional simulado
 
-## Requisitos previos
-- **Flutter SDK** (3.11 o superior) — https://docs.flutter.dev/get-started/install
-- **Android Studio** o el **Android SDK** + un emulador o dispositivo fisico.
-- Verificar instalacion:
-  ```bash
-  flutter doctor
-  ```
+### Requisitos cumplidos
+- Widget visual similar a Gmail.
+- Opcion de busqueda (filtra por asunto o remitente).
+- Boton de redactar (formulario simulado).
+- Contador de correos no leidos.
+- Correos guardados en memoria.
+- Buscar correos por asunto o remitente.
+- Contar correos no leidos.
+- Simular redaccion de un nuevo correo.
+- Recepcion de correo simulada (FAB +).
+- Interfaz actualizada con Provider (`ChangeNotifier` + `notifyListeners`).
 
-## Instalacion
-```bash
-# 1. Clonar el repo
-git clone https://github.com/alfonso1031/moviles-deberes-labs-U2.git
-
-# 2. Entrar a la carpeta del proyecto
-cd "moviles-deberes-labs-U2/Laboratorio 2.2 Widgets"
-
-# 3. Descargar dependencias
-flutter pub get
-```
-
-## Ejecutar
-```bash
-# Con un emulador o celular conectado:
-flutter run
-```
-Ver dispositivos disponibles: `flutter devices`
-
-## Probar la APK directamente
-La APK ya viene compilada en la raiz de esta carpeta:
-```
-app-release.apk
-```
-Instalar en un celular Android (depuracion USB activada):
-```bash
-flutter install
-# o manualmente:
-adb install app-release.apk
-```
-Generar la APK de nuevo:
-```bash
-flutter build apk --release
-# salida: build/app/outputs/flutter-apk/app-release.apk
-```
-
----
-
-## Como usar la app
-| Accion | Que hace |
-|--------|----------|
-| Barra de busqueda | Filtra correos por **asunto** o **remitente**. |
-| Badge "N no leidos" | Tap → marca **todos** como leidos. |
-| Boton **Redactar** | Formulario simulado; crea el correo enviado. |
-| **FAB (+)** | Simula la **recepcion** de un correo nuevo. |
-| Tap en un correo | Lo marca como **leido**. |
-
-Toda la UI se actualiza con **Provider** (`ChangeNotifier` + `notifyListeners`).
-
-## Arquitectura (MVVM)
+### Arquitectura (separacion MVVM)
 ```
 lib/
-├── models/correo.dart                 # MODEL
-├── viewmodels/correo_viewmodel.dart   # VIEWMODEL (logica + estado)
-├── views/home_page.dart               # VIEW (pantalla + dialogos)
-├── widgets/gmail_widget.dart          # WIDGET (UI tipo Gmail)
-└── main.dart                          # MultiProvider + MaterialApp
+├── models/
+│   └── correo.dart              # MODEL: datos del correo
+├── viewmodels/
+│   └── correo_viewmodel.dart    # VIEWMODEL: logica + estado (ChangeNotifier)
+├── views/
+│   └── home_page.dart           # VIEW: pantalla principal
+├── widgets/
+│   └── gmail_widget.dart        # WIDGET: componente visual tipo Gmail
+└── main.dart                    # MultiProvider + MaterialApp
 ```
 
-## Fases del laboratorio
-- **Fase 1** — Prototipo simulado (este proyecto + APK). ✓
-- **Fase 2** — Conexion real con Gmail (Gmail API + OAuth):
-  documentada en [FASE2_Gmail_API.md](FASE2_Gmail_API.md).
+| Capa      | Responsabilidad                                  |
+|-----------|--------------------------------------------------|
+| Model     | Representa un correo (remitente, asunto, leido). |
+| ViewModel | Logica: buscar, contar, marcar leido, redactar.  |
+| View      | Pantalla, dialogos de busqueda/redaccion.        |
+| Widget    | UI reutilizable que observa el ViewModel.        |
+
+### Ejecutar
+```bash
+flutter pub get
+flutter run
+```
+
+### APK generada
+```
+build/app/outputs/flutter-apk/app-release.apk
+```
+Generar de nuevo: `flutter build apk --release`
+
+## Fase 2 — Conexion real con Gmail (implementada)
+
+Pantalla **Gmail real** (icono nube en la AppBar): login con Google, lee y
+envia correos reales mediante OAuth 2.0 + Gmail API.
+
+Codigo:
+```
+lib/services/gmail_service.dart       # OAuth + Gmail API (leer/enviar)
+lib/viewmodels/gmail_viewmodel.dart   # estado de la Fase 2
+lib/views/gmail_real_page.dart        # pantalla de correos reales
+```
+
+### Configuracion en Google Cloud (obligatoria para que funcione)
+La parte simulada (Fase 1) corre sin nada extra. Para la Fase 2 real:
+
+1. **Proyecto**: https://console.cloud.google.com → crear proyecto.
+2. **Habilitar API**: APIs y servicios → Biblioteca → **Gmail API** → Habilitar.
+3. **Pantalla de consentimiento OAuth**: tipo **Externo**; agregar scopes
+   `gmail.readonly` y `gmail.send`; en **Usuarios de prueba** agregar tu correo
+   Gmail (sin esto el login falla con `access_denied`).
+4. **Credenciales** → Crear → **ID de cliente OAuth** → tipo **Android**:
+   - Nombre del paquete: `com.example.laboratorio_widgets`
+   - Huella **SHA-1** (debug): obtenerla con
+     ```bash
+     keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore \
+       -alias androiddebugkey -storepass android -keypass android
+     ```
+   - Para la APK de *release* repetir con tu keystore de firma.
+
+En Android no se necesita `google-services.json` ni client_id en el codigo:
+`google_sign_in` usa el cliente OAuth registrado por **paquete + SHA-1**.

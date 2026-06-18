@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/correo_viewmodel.dart';
 import '../widgets/gmail_widget.dart';
+import 'gmail_real_page.dart';
 
 /// View (capa VIEW del patron MVVM).
 /// Pantalla principal que muestra el GmailWidget.
@@ -18,6 +19,16 @@ class HomePage extends StatelessWidget {
         backgroundColor: Colors.red,
         foregroundColor: Colors.white,
         title: const Text('Prototipo de widget'),
+        actions: [
+          IconButton(
+            tooltip: 'Gmail real (Fase 2)',
+            icon: const Icon(Icons.cloud),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const GmailRealPage()),
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: GmailWidget(
